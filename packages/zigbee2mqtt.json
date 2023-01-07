@@ -1,0 +1,342 @@
+[
+    {
+        "id": "658f050f4a9cd320",
+        "type": "subflow",
+        "name": "Zigbee2Mqtt",
+        "info": "",
+        "category": "Packages",
+        "in": [
+            {
+                "x": 40,
+                "y": 40,
+                "wires": [
+                    {
+                        "id": "facf1b9e93ddb80e"
+                    },
+                    {
+                        "id": "71b2d178ddda0b40"
+                    },
+                    {
+                        "id": "cb9fd23ce1f623c2"
+                    },
+                    {
+                        "id": "b69965496cd02e9b"
+                    },
+                    {
+                        "id": "e96e5aba22e08287"
+                    },
+                    {
+                        "id": "563b86018a5a1239"
+                    },
+                    {
+                        "id": "ca0b86420ddce533"
+                    },
+                    {
+                        "id": "f2834b9f75c4623b"
+                    },
+                    {
+                        "id": "465c2d74b44ec834"
+                    },
+                    {
+                        "id": "93e35612dc852f48"
+                    },
+                    {
+                        "id": "1e2df30fb076a0fa"
+                    }
+                ]
+            }
+        ],
+        "out": [],
+        "env": [],
+        "meta": {},
+        "color": "#e7c000",
+        "icon": "node-red/bridge.svg"
+    },
+    {
+        "id": "facf1b9e93ddb80e",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "MotionSensor",
+        "func": "let $ = global.get(\"registry\");\nlet Property = await $.get(\"Property\");\nlet Hass = await $.get(\"Hass.*\");\n\nclass MotionSensor extends Property.Group {\n    constructor() {\n        super({\n            \"Occupancy\": new Hass.BinarySensor()\n        });\n    }\n\n    changed() {\n        if (this.Occupancy.value)\n            this.red(\"Motion detected\");\n        else\n            this.green(\"Clear\");\n    }\n}\n\n$.register(\"Z2M.MotionSensor\", MotionSensor);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 220,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "cb9fd23ce1f623c2",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "EnvironmentSensor",
+        "func": "let $ = global.get(\"registry\");\nlet Property = await $.get(\"Property\");\nlet Sensor = await $.get(\"Hass.Sensor\");\n\nclass EnvironmentSensor extends Property.Group {\n    constructor() {\n        super({\n            \"Temperature\": new Sensor(),\n            \"Humidity\": new Sensor(),\n            \"Pressure\": new Sensor(),\n        });\n    }\n\n    changed() {\n        this.green(`${this.Temperature.value}°C (${this.Humidity.value}%)`);\n    }\n}\n\n$.register(\"Z2M.EnvironmentSensor\", EnvironmentSensor);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 230,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "71b2d178ddda0b40",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "ContactSensor",
+        "func": "let $ = global.get(\"registry\");\nlet Property = await $.get(\"Property\");\nlet Hass = await $.get(\"Hass.*\");\n\nclass ContactSensor extends Property.Group {\n    constructor() {\n        super({\n            \"Contact\": new Hass.BinarySensor()\n        });\n    }\n\n    changed() {\n        if (this.Contact.value)\n            this.green(\"Closed\");\n        else\n            this.red(\"Open\");\n    }\n}\n\n$.register(\"Z2M.ContactSensor\", ContactSensor);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 220,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b69965496cd02e9b",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "Z2M.*",
+        "func": "let $ = global.get(\"registry\");\n\nlet MotionSensor = await $.get(\"Z2M.MotionSensor\");\nlet ContactSensor = await $.get(\"Z2M.ContactSensor\");\nlet EnvironmentSensor = await $.get(\"Z2M.EnvironmentSensor\");\nlet WaterLeakSensor = await $.get(\"Z2M.WaterLeakSensor\");\n\nlet Button = await $.get(\"Z2M.Button\");\n\nlet Switch = await $.get(\"Z2M.Switch\");\nlet DoubleSwitch = await $.get(\"Z2M.DoubleSwitch\");\nlet Light = await $.get(\"Z2M.Light\");\nlet Blind = await $.get(\"Z2M.Blind\");\n\nclass Z2M {\n    static MotionSensor = MotionSensor;\n    static ContactSensor = ContactSensor;\n    static EnvironmentSensor = EnvironmentSensor;\n    static WaterLeakSensor = WaterLeakSensor;\n\n    static Button = Button;\n\n    static Switch = Switch;\n    static DoubleSwitch = DoubleSwitch;\n    static Light = Light;\n    static Blind = Blind;\n}\n\n$.register(\"Z2M.*\", Z2M);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 190,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "484c8edd965f9d17",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "Z2MPlugin",
+        "func": "let $ = global.get(\"registry\");\nlet Plugin = await $.get(\"Plugin\");\nlet Property = await $.get(\"Property\");\nlet MqttPlugin = await $.get(\"Mqtt.Plugin\");\n\nlet Z2M = await $.get(\"Z2M.*\");\nlet Hass = await $.get(\"Hass.*\");\n\nclass Z2mMqttPlugin extends MqttPlugin {\n    subscribe(args) {\n        if (!args.properties) args.properties = {};\n\n        if (args.group instanceof Z2M.Button) {\n            args.properties.Action = Object.assign({ name: \"action\" }, args.properties.Action);\n        }\n\n        if (args.group instanceof Z2M.MotionSensor) {\n            args.properties.Occupancy = Object.assign({ name: \"occupancy\" }, args.properties.Occupancy);\n        }\n\n        if (args.group instanceof Z2M.ContactSensor) {\n            args.properties.Contact = Object.assign({ name: \"contact\" }, args.properties.Contact);\n        }\n\n        if (args.group instanceof Z2M.WaterLeakSensor) {\n            args.properties.WaterLeak = Object.assign({ name: \"water_leak\" }, args.properties.WaterLeak);\n        }\n        \n        if (args.group instanceof Z2M.EnvironmentSensor) {\n            args.properties.Temperature = Object.assign({ name: \"temperature\" }, args.properties.Temperature);\n            args.properties.Humidity = Object.assign({ name: \"humidity\" }, args.properties.Humidity);\n            args.properties.Pressure = Object.assign({ name: \"pressure\" }, args.properties.Pressure);\n        }\n\n        if (args.group instanceof Z2M.Switch) {\n            args.properties.State = Object.assign({ name: \"state\", outgoingConverter: state => state? 'on' : 'off' }, args.properties.State);\n            args.properties.Power = Object.assign({ name: \"power\" }, args.properties.Power);\n            args.properties.Energy = Object.assign({ name: \"energy\" }, args.properties.Energy);\n        }\n\n        if (args.group instanceof Z2M.DoubleSwitch) {\n            args.properties.Left = Object.assign({ name: \"state_left\", outgoingConverter: state => state ? 'on' : 'off' }, args.properties.Left);\n            args.properties.Right = Object.assign({ name: \"state_right\", outgoingConverter: state => state ? 'on' : 'off' }, args.properties.Right);\n            args.properties.Power = Object.assign({ name: \"power\" }, args.properties.Power);\n            args.properties.Energy = Object.assign({ name: \"energy\" }, args.properties.Energy);\n        }\n\n        if (args.group instanceof Z2M.Light) {\n            args.properties.State = Object.assign({ name: \"state\", outgoingConverter: state => state ? 'on' : 'off' }, args.properties.State);\n            args.properties.Brightness = Object.assign({ name: \"brightness\", incomingConverter: data => Math.floor(data / 255 * 100), outgoingConverter: data => Math.floor(data / 100 * 255) }, args.properties.Brightness);\n            args.properties.Kelvin = Object.assign({ name: \"kelvin\" }, args.properties.Kelvin);\n        }\n\n        if (args.group instanceof Z2M.Blind) {\n            args.properties.Position = Object.assign({ name: \"position\", incomingConverter: value => 100 - value, outgoingConverter: value => 100 - value }, args.properties.State);\n        }\n\n        super.subscribe(args);\n    }\n}\n\n$.register(\"Z2M.MqttPlugin\", Z2mMqttPlugin);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "mqtt",
+                "module": "mqtt"
+            }
+        ],
+        "x": 470,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "820b9b8c10bfba5a",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "Z2M.HassPlugin",
+        "func": "let $ = global.get(\"registry\");\nlet Plugin = await $.get(\"Plugin\");\nlet Property = await $.get(\"Property\");\nlet HassPlugin = await $.get(\"Hass.Plugin\");\nlet Z2MPlugin = await $.get(\"Z2M.MqttPlugin\");\n\nlet Z2M = await $.get(\"Z2M.*\");\n\nclass Z2MHass extends HassPlugin {\n    mqtt;\n\n    init(args) {\n        super.init(args);\n        this.mqtt = new Z2MPlugin();\n        this.mqtt.init({target: this.target, mqttService: this.mqttService});\n    }\n\n    z2mlight(propertyGroup, name = \"Light\") {\n        this.publish({\n            name: name,\n            topic: `${this.home}/${this.room}/${name}`,\n            group: propertyGroup,\n        });\n    }\n\n\n    blind(propertyGroup, name = \"Blind\") {\n        this.publish({\n            name: name,\n            topic: `${this.home}/${this.room}/${name}`,\n            group: propertyGroup,\n            properties: {\n                device_class: \"blind\"\n            }\n        });\n    }\n\n    environment(propertyGroup, name = \"EnvironmentSensor\") {\n        this.publish({\n            name: name,\n            topic: `${this.home}/${this.room}/${name}`,\n            group: propertyGroup,\n            properties: {\n                Temperature: { unit: \"°C\", device_class: \"temperature\" },\n                Humidity: { unit: \"%\", device_class: \"humidity\" },\n                Pressure: { unit: \"Pa\", device_class: \"pressure\" },\n            }\n        });\n        return;\n    }\n\n    singleSwitch(propertyGroup, name = \"Switch\") {\n        this.publish({\n            name: name,\n            topic: `${this.home}/${this.room}/${name}`,\n            group: propertyGroup,\n            properties: {\n                State: {},\n                Power: { unit: \"W\", device_class: \"power\" },\n                Energy: { unit: \"kWh\", state_class: \"total_increasing\" ,device_class: \"energy\" },\n            }\n        });\n        return;\n    }\n\n    occupancy(property, name = \"Occupancy\") {\n        //let propertyGroup = new PropertyGroup();\n        let topic = `${this.home}/${this.room}/${name}`;\n        let device = this.device(name);\n        //let occupancy = this.sensor({ device, name: \"Occupancy\", device_class: \"temperature\", state_topic: topic });\n        //this.mqttService.publish({ topic: `${this.DiscoveryTopic}/sensor/${temperature.unique_id}/config`, payload: temperature, retain: true });\n    }\n}\n\n$.register(\"Z2M.HassPlugin\", Z2MHass);\n\nreturn msg;\n\n/* BINARY\nlet name = env.get(\"name\");\n\nlet sensor = {\n    name: `${name}`, \n    unique_id: `${msg.prefix}_${name}`,\n    object_id: `${msg.prefix}_${name}`,\n    device: msg.payload,\n    device_class: env.get(\"device_class\"),\n    state_topic: msg.topic,\n    value_template: `{{ value_json.${name}.to }}`,\n    payload_on: true,\n    payload_off: false,\n}\n*/\n\n/* Light\nlet enabled = env.get(\"enabled\");\nif (!enabled) return null;\n\nlet light = {\n    name: `${msg.payload.home} ${msg.payload.room} ${msg.payload.device}`, \n    unique_id: `${msg.payload.home}_${msg.payload.room}_${msg.payload.device}`, \n    device: msg.payload.config,\n    schema: \"template\",\n    \n    state_topic: `${msg.payload.home}/${msg.payload.room}/${msg.payload.device}`,\n    state_template: `\n    {% if value_json.State.to %}\n        on\n    {% else %}\n        off\n    {% endif %}`,\n    \n    brightness_template: `{{ value_json.Brightness.to | float | multiply(2.55) | round(0) }}`,\n\n    color_temp_template: `{{ (1000000 / value_json.Kelvin.to | float) | round(0) }}`,\n\n\n    command_topic: `${msg.payload.home}/${msg.payload.room}/${msg.payload.device}/set`,\n    command_on_template: `{ \n        \"State\": { \"to\": true }\n        {%- if brightness is defined -%}\n        , \"Brightness\": { \"to\": {{brightness | float | multiply(0.39215686) | round(0)}} }\n        {%- endif -%}\n        {%- if color_temp is defined -%}\n        , \"Kelvin\": { \"to\": {{ [[(1000000 / color_temp | float) | round(0), 3000] | max, 6500] | min }} }\n        {%- endif -%}\n        }`,\n    command_off_template: `{ \"State\": { \"to\": false } }`,\n\n    brightness_command_topic: `${msg.payload.home}/${msg.payload.room}/${msg.payload.device}/set`,\n    brightness_command_template: `{ \"Brightness\": { \"to\": {{ value }} } }`,\n\n    color_temp_command_topic: `${msg.payload.home}/${msg.payload.room}/${msg.payload.device}/set`,\n    color_temp_command_template: `{ \"Kelvin\": { \"to\": {{ 1000000 / value }} } }`,\n};\n\nreturn {\n    topic: `homeassistant/light/${light.unique_id}/config`,\n    payload: light\n};\n*/\n\n/* Switch\nlet name = env.get(\"name\");\n\nlet state = {\n    name: `${name}`, \n    unique_id: `${msg.prefix}_${name}`, \n    object_id: `${msg.prefix}_${name}`, \n    device: msg.payload,\n    device_class: env.get(\"device_class\"), \n    state_topic: msg.topic,\n    command_topic: `${msg.topic}/set`,\n    value_template: `{{ value_json.${name}.to }}`,\n    state_on: true,\n    state_off: false,\n    payload_on: `{ \"${name}\": { \"to\": true }}`,\n    payload_off: `{ \"${name}\": { \"to\": false }}`,\n};\n\nreturn {\n    topic: `homeassistant/switch/${state.unique_id}/config`,\n    payload: state\n};\n*/\n\n/* ALARM\nlet name = env.get(\"name\");\n\nlet sensor = {\n    name: `${name}`, \n    unique_id: `${msg.prefix}_${name}`,\n    object_id: `${msg.prefix}_${name}`,\n    device: msg.payload,\n    state_topic: msg.topic,\n    command_topic: `${msg.topic}/set`,\n    value_template: `{{ value_json.${name}.to }}`,\n    command_template: `{ \"${name}\": { \"to\": \"{{ action }}\" } }`\n}\n\nreturn {\n    topic: `homeassistant/alarm_control_panel/${sensor.unique_id}/config`,\n    payload: sensor\n};\n*/",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "mqtt",
+                "module": "mqtt"
+            }
+        ],
+        "x": 480,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e96e5aba22e08287",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "Switch",
+        "func": "let $ = global.get(\"registry\");\nlet Property = await $.get(\"Property\");\nlet Hass = await $.get(\"Hass.*\");\n\nclass Switch extends Property.Group {\n    constructor() {\n        super({\n            \"State\": new Hass.Switch(),\n            \"Energy\": new Hass.Sensor(),\n            \"Power\": new Hass.Sensor(),\n        });\n    }\n\n    changed() {\n        if (this.State.value)\n            this.green(`${this.Energy.value} kWh (${0.0 + this.Power.value} W)`);\n        else\n            this.red(`${this.Energy.value} kWh`);\n    }\n}\n\n$.register(\"Z2M.Switch\", Switch);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 190,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f2834b9f75c4623b",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "WaterLeakSensor",
+        "func": "let $ = global.get(\"registry\");\nlet Property = await $.get(\"Property\");\n\nlet Hass = await $.get(\"Hass.*\");\n\nclass WaterLeakSensor extends Property.Group {\n    constructor() {\n        super({\n            \"WaterLeak\": new Hass.BinarySensor()\n        });\n    }\n\n    changed() {\n        if (this.WaterLeak.value)\n            this.red();\n        else\n            this.green();\n    }\n}\n\n$.register(\"Z2M.WaterLeakSensor\", WaterLeakSensor);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 230,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "93e35612dc852f48",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "Blind",
+        "func": "let $ = global.get(\"registry\");\nlet Property = await $.get(\"Property\");\n\nlet Hass = await $.get(\"Hass.*\");\n\nclass Blind extends Hass.Cover {\n    constructor() {\n        super();\n        this.Position.on(\"changed\", data => {\n            if (data.to === 100) this.State.set(\"closed\");\n            else if(data.to === 0) this.State.set(\"open\");\n            else if(data.to > data.from) this.State.set(\"closing\");\n            else if(data.to < data.from) this.State.set(\"opening\");\n        })\n        this.State.on(\"command\", value => {\n            if (value === \"open\") this.Position.command(0);\n            if (value === \"close\") this.Position.command(100);\n            if (value === \"stop\") this.Position.command(this.Position.value);\n        })\n    }\n}\n\n$.register(\"Z2M.Blind\", Blind);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 190,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "465c2d74b44ec834",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "Light",
+        "func": "let $ = global.get(\"registry\");\nlet Property = await $.get(\"Property\");\nlet Hass = await $.get(\"Hass.*\");\n\nclass Light extends Hass.Light {\n}\n\n$.register(\"Z2M.Light\", Light);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 190,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ca0b86420ddce533",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "DoubleSwitch",
+        "func": "let $ = global.get(\"registry\");\nlet Property = await $.get(\"Property\");\n\nlet Hass = await $.get(\"Hass.*\");\n\nclass DoubleSwitch extends Property.Group {\n    constructor() {\n        super({\n            \"Left\": new Hass.Switch(),\n            \"Right\": new Hass.Switch(),\n            \"Energy\": new Hass.Sensor(),\n            \"Power\": new Hass.Sensor(),\n        });\n    }\n\n    changed() {\n        if (this.Left.value || this.Right.value)\n            this.green(`${this.Energy.value} kWh (${0.0 + this.Power.value} W)`);\n        else\n            this.red();\n    }\n}\n\n$.register(\"Z2M.DoubleSwitch\", DoubleSwitch);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 220,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1e2df30fb076a0fa",
+        "type": "function",
+        "z": "658f050f4a9cd320",
+        "name": "Button",
+        "func": "let $ = global.get(\"registry\");\nlet Property = await $.get(\"Property\");\nlet Hass = await $.get(\"Hass.*\");\n\nclass Button extends Property.Group {\n    constructor() {\n        super({\n            \"Action\": new Hass.Action(),\n        });\n    }\n\n    changed() {\n        this.green(\"\" + this.Action.value);\n    }\n}\n\n$.register(\"Z2M.Button\", Button);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 190,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "563b86018a5a1239",
+        "type": "junction",
+        "z": "658f050f4a9cd320",
+        "x": 320,
+        "y": 40,
+        "wires": [
+            [
+                "484c8edd965f9d17",
+                "820b9b8c10bfba5a"
+            ]
+        ]
+    },
+    {
+        "id": "7395f23430f9d47c",
+        "type": "subflow:658f050f4a9cd320",
+        "z": "e842d50887889072",
+        "name": "",
+        "x": 155,
+        "y": 460,
+        "wires": [],
+        "l": false
+    }
+]
