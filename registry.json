@@ -1,304 +1,121 @@
 [
     {
-        "id": "879948f81429fbc8",
+        "id": "50dd3bd392e226e0",
         "type": "subflow",
-        "name": "Changed",
+        "name": "Registry",
         "info": "",
         "category": "Registry",
         "in": [],
         "out": [
             {
-                "x": 260,
+                "x": 580,
                 "y": 40,
                 "wires": [
                     {
-                        "id": "4d91d53ef6912666",
+                        "id": "3496626a2be3fa42",
                         "port": 0
                     }
                 ]
             }
         ],
-        "env": [
-            {
-                "name": "node",
-                "type": "str",
-                "value": ""
-            },
-            {
-                "name": "path",
-                "type": "str",
-                "value": ""
-            }
-        ],
-        "meta": {},
-        "color": "#F3B567",
-        "icon": "font-awesome/fa-flash"
-    },
-    {
-        "id": "4d91d53ef6912666",
-        "type": "function",
-        "z": "879948f81429fbc8",
-        "name": "Node",
-        "func": "let $ = global.get(\"registry\");\nconst expand = (obj, path) => path.split(\".\").reduce((r, k) => r?.[k], obj);\n\nlet target = await $.getInstance(env.get(\"node\"));\ntarget = expand(target, env.get(\"path\"))\n\ntarget.on(\"changed\", data => {\n    node.send({payload: data.to});\n});",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 150,
-        "y": 40,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "2ce0cc56fde999bd",
-        "type": "subflow:2f546c91f509d875",
-        "z": "879948f81429fbc8",
-        "name": "",
-        "x": 35,
-        "y": 40,
-        "wires": [
-            [
-                "4d91d53ef6912666"
-            ]
-        ],
-        "l": false
-    },
-    {
-        "id": "6921f1f3fbfe8775",
-        "type": "subflow",
-        "name": "Set",
-        "info": "",
-        "category": "Registry",
-        "in": [
-            {
-                "x": 40,
-                "y": 120,
-                "wires": [
-                    {
-                        "id": "8c32106737a3832c"
-                    }
-                ]
-            }
-        ],
-        "out": [],
-        "env": [
-            {
-                "name": "node",
-                "type": "str",
-                "value": ""
-            },
-            {
-                "name": "path",
-                "type": "str",
-                "value": ""
-            }
-        ],
-        "meta": {},
-        "color": "#F3B567",
-        "icon": "font-awesome/fa-wrench"
-    },
-    {
-        "id": "61690c152b0059d3",
-        "type": "function",
-        "z": "6921f1f3fbfe8775",
-        "name": "Node",
-        "func": "let $ = global.get(\"registry\");\nconst expand = (obj, path) => path.split(\".\").reduce((r, k) => r?.[k], obj);\n\nlet target = await $.getInstance(env.get(\"node\"));\ntarget = expand(target, env.get(\"path\"))\n\nflow.set(\"target\", target);",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 150,
-        "y": 40,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "8c32106737a3832c",
-        "type": "function",
-        "z": "6921f1f3fbfe8775",
-        "name": "Trigger",
-        "func": "let target = flow.get(\"target\");\n\nif (!target) return null;\n\ntarget.command(msg.payload);",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 150,
-        "y": 120,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "bc3a6b338c07c4f1",
-        "type": "subflow:2f546c91f509d875",
-        "z": "6921f1f3fbfe8775",
-        "name": "",
-        "x": 35,
-        "y": 40,
-        "wires": [
-            [
-                "61690c152b0059d3"
-            ]
-        ],
-        "l": false
-    },
-    {
-        "id": "ffb5227f5ff229e9",
-        "type": "subflow",
-        "name": "Property",
-        "info": "",
-        "category": "Registry",
-        "in": [
-            {
-                "x": 40,
-                "y": 40,
-                "wires": [
-                    {
-                        "id": "fbd74d94dc726844"
-                    }
-                ]
-            }
-        ],
-        "out": [],
-        "env": [
-            {
-                "name": "path",
-                "type": "str",
-                "value": ""
-            }
-        ],
-        "meta": {},
-        "color": "#FFFFFF",
-        "icon": "node-red/comment.svg",
-        "status": {
-            "x": 200,
-            "y": 100,
-            "wires": [
-                {
-                    "id": "7e218dc0a6e067ea",
-                    "port": 0
-                }
-            ]
-        }
-    },
-    {
-        "id": "fbd74d94dc726844",
-        "type": "function",
-        "z": "ffb5227f5ff229e9",
-        "name": "Subscribe",
-        "func": "let $ = global.get(\"registry\");\nlet target = await $.getInstance(msg.payload);\n\nconst expand = (obj, path) => path.split(\".\").reduce((r, k) => r?.[k], obj);\n\ntarget = expand(target, env.get(\"path\"))\ntarget.on(\"status\", data => node.status(data));\nnode.status(target.status);",
-        "outputs": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 160,
-        "y": 40,
-        "wires": []
-    },
-    {
-        "id": "7e218dc0a6e067ea",
-        "type": "status",
-        "z": "ffb5227f5ff229e9",
-        "name": "",
-        "scope": [
-            "fbd74d94dc726844"
-        ],
-        "x": 80,
-        "y": 100,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "2f546c91f509d875",
-        "type": "subflow",
-        "name": "Initialized",
-        "info": "",
-        "category": "Registry",
-        "in": [
-            {
-                "x": 40,
-                "y": 40,
-                "wires": [
-                    {
-                        "id": "d0b553f88ea4af86"
-                    }
-                ]
-            }
-        ],
-        "out": [
-            {
-                "x": 200,
-                "y": 40,
-                "wires": [
-                    {
-                        "id": "d7871eaf306d0121",
-                        "port": 0
-                    },
-                    {
-                        "id": "d0b553f88ea4af86",
-                        "port": 0
-                    }
-                ]
-            }
-        ],
-        "env": [
-            {
-                "name": "trigger",
-                "type": "bool",
-                "value": "true",
-                "ui": {
-                    "label": {
-                        "en-US": "Send initial message"
-                    },
-                    "type": "checkbox"
-                }
-            }
-        ],
+        "env": [],
         "meta": {},
         "color": "#3FADB5",
-        "icon": "font-awesome/fa-hourglass-start"
+        "icon": "font-awesome/fa-cubes"
     },
     {
-        "id": "d7871eaf306d0121",
+        "id": "b15f018fae453d3b",
         "type": "function",
-        "z": "2f546c91f509d875",
-        "name": "Init",
+        "z": "50dd3bd392e226e0",
+        "name": "Registry",
         "func": "",
         "outputs": 1,
         "noerr": 0,
-        "initialize": "let interval;\n\ninterval = setInterval(() => {\n    let $ = global.get(\"registry\");\n    if ($ !== null && $ !== undefined) {\n        clearInterval(interval);\n        if (env.get(\"trigger\"))\n            node.send({});\n        let buffer = flow.get(\"buffer\") || [];\n        buffer.forEach(msg => node.send(msg));\n    }\n}, 100);",
+        "initialize": "global.set(\"registry\", null);\n\nclass AsyncStore {\n    Items = {};\n    ItemsPromises = {};\n    ItemsResolvers = {};\n\n    Add(id, item) {\n        this.Items[id] = item;\n\n        if (id in this.ItemsPromises) {\n            this.ItemsResolvers[id].resolve(item);\n            delete this.ItemsPromises[id];\n            delete this.ItemsResolvers[id];\n        }\n    }\n\n    Get(id) {\n        if (id in this.Items) {\n            return Promise.resolve(this.Items[id]);\n        }\n        if (id in this.ItemsPromises) {\n            return this.ItemsPromises[id];\n        }\n\n        let promise = new Promise((resolve, reject) => {\n            this.ItemsResolvers[id] = {\n                resolve: resolve,\n                reject: reject,\n            }\n        });\n\n        this.ItemsPromises[id] = promise;\n        return promise;\n    }\n}\n\nclass Registry {\n    Types = new AsyncStore();\n    Instances = new AsyncStore();\n\n    register(id, type) {\n        this.Types.Add(id, type);\n    }\n\n    get(id) {\n        return Promise.race([\n            this.Types.Get(id),\n            new Promise((resolve, reject) => {\n                setTimeout(() => reject(`Type not found: ${id}`), 5000);\n            })\n        ]);\n    }\n\n    getAll(...ids) {\n        let promises = [];\n        ids.forEach(id => promises.push(this.get(id)));\n        return Promise.all(promises);\n    }\n\n    registerInstance(id, instance) {\n        this.Instances.Add(id, instance);\n    }\n\n    getInstance(id) {\n        return this.Instances.Get(id);\n    }\n\n    async resolveDependencies(instance) {\n        let promises = [];\n\n        for (const key in instance) {\n            if (instance[key] instanceof this.Require === false) continue;\n            \n            promises.push(\n                this.getInstance(instance[key].id)\n                    .then(target => instance[key] = target)\n            );\n        }\n\n        await Promise.all(promises);\n        return instance;\n    }\n\n    Require = class {\n        constructor(id) {\n            this.id = id;\n        }\n    }\n}\n\nlet registry = new Registry();\nglobal.set(\"registry\", registry);\nnode.send({});",
         "finalize": "",
-        "libs": [],
-        "x": 70,
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 80,
+        "y": 40,
+        "wires": [
+            [
+                "3d1b29e26135f3fc"
+            ]
+        ]
+    },
+    {
+        "id": "7829eb2fa756222a",
+        "type": "function",
+        "z": "50dd3bd392e226e0",
+        "name": "Node",
+        "func": "let $ = global.get(\"registry\");\nlet Base = await $.get(\"Base\");\n\nclass Plugin extends Base {\n    target = new Base.Argument({required: true});\n}\n\nclass PluginDescriptor {\n    constructor(type, args) {\n        this.type = type;\n        this.args = args;\n    }\n}\n\nclass Status {\n    constructor(node) {\n        this.node = node;\n    }\n\n    green(text = \"\") {\n        this.node.status({ shape: \"dot\", fill: \"green\", text: text });\n    }\n    \n    yellow(text = \"\") {\n        this.node.status({ shape: \"dot\", fill: \"yellow\", text: text });\n    }\n\n    red(text = \"\") { \n        this.node.status({ shape: \"ring\", fill: \"red\", text: text });\n    }\n\n    clear() { \n        this.node.status({ shape: \"\", fill: \"\", text: \"\" });\n    }\n}\n\nclass Log {\n    constructor(node, debug) {\n        this. node = node;\n        this.debug = debug;\n    }\n\n    debug(object) { \n        if (this.debug) \n            this.node.warn({ object }); \n    }\n\n    warning(object) { \n        this.node.warn({ object });\n    }\n\n    error(object) { \n        this.node.error({ object });\n    }\n}\n\nclass Node extends Base {\n    static Plugin = PluginDescriptor;\n    \n    log;\n    status;\n    node = new Base.Argument({required: true});  \n    \n    init(args) {\n        super.init(args);\n        \n        if (this.node instanceof Node) {\n            this.node = this.node.node;\n        }\n\n        this.status = new Status(this.node);\n        this.log = new Log(this.node, this.debug);\n\n        Object.getOwnPropertyNames(this).forEach(key => {\n            if (this[key] instanceof PluginDescriptor) {\n                let pluginDescriptor = this[key];\n                this[key] = new pluginDescriptor.type();\n                this[key].init(\n                    Object.assign(\n                        {},\n                        pluginDescriptor.args,\n                        { target: this }\n                    )\n                );\n                this.resources.push(new Base.Resource(() => this[key].destructor()));\n            }\n        });\n\n        this.node.on('close', () => {\n            this.destructor();\n        });\n    }\n}\n\n$.register(\"Node\", Node);\n$.register(\"Plugin\", Plugin);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 230,
         "y": 80,
+        "wires": [
+            [
+                "3496626a2be3fa42"
+            ]
+        ]
+    },
+    {
+        "id": "3496626a2be3fa42",
+        "type": "function",
+        "z": "50dd3bd392e226e0",
+        "name": "Property",
+        "func": "let $ = global.get(\"registry\");\nlet EventEmitter = await $.get(\"EventEmitter\");\n\nclass PropertyGroup extends EventEmitter {\n    debounceTimer = null;\n    debounceMillis = 50;\n    status = { fill: \"yellow\", shape: \"dot\", text: \"initializing...\" };\n\n    constructor(properties = {}) {\n        super();\n        Object.getOwnPropertyNames(properties)\n            .forEach(propertyName => {\n                this.add(propertyName, properties[propertyName]);\n            });\n    }\n\n    add(name, property) {\n        this[name] = property;\n        property.on(\"updated\", () => this.emit(\"updated\", null));\n        property.on(\"changed\", () => {\n            if (this.debounceTimer) clearTimeout(this.debounceTimer);\n            this.debounceTimer = setTimeout(() => {\n                this.changed();\n                this.emit(\"changed\", null);\n            }, this.debounceMillis);\n        });\n    }\n\n    changed() {\n    }\n\n    red(text = '') {\n        this.status = {\n            fill: \"red\",\n            shape: \"ring\",\n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n\n    green(text = '') {\n        this.status = {\n            fill: \"green\",\n            shape: \"dot\",\n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n}\n\nclass Property extends EventEmitter {\n    static Group = PropertyGroup;\n\n    value = null;\n    status = {fill: \"green\", shape: \"dot\", text: \"\"};\n\n    get () {\n        return this.value;\n    }\n\n    set (value) {\n        if (this.value !== value) {\n            let oldValue = this.value;\n            this.value = value;\n            try {\n            this.changed(value);\n            this.emit(\"changed\", { source: this, from: oldValue, to: value, at: null });\n            } catch (e) {node.error(e.stack);}\n        }\n\n        this.emit(\"updated\", { source: this, from: value, to: value, at: null });\n    }\n\n    changed(value) {\n        this.green(\"\" + value);\n    }\n\n    command (value) {\n        this.emit(\"command\", value);\n    }\n\n    red(text = '') {\n        this.status = {\n            fill: \"red\",\n            shape: \"ring\",\n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n\n    green(text = '') {\n        this.status = {\n            fill: \"green\", \n            shape: \"dot\", \n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n}\n\n$.register(\"Property\", Property);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 420,
+        "y": 40,
         "wires": [
             []
         ]
     },
     {
-        "id": "d0b553f88ea4af86",
+        "id": "3d1b29e26135f3fc",
         "type": "function",
-        "z": "2f546c91f509d875",
-        "name": "Buffer",
-        "func": "let registry = global.get(\"registry\");\nif (registry) return msg;\n\nlet buffer = flow.get(\"buffer\") || [];\nbuffer.push(msg);\nflow.set(\"buffer\", buffer);\n",
+        "z": "50dd3bd392e226e0",
+        "name": "Base",
+        "func": "let $ = global.get(\"registry\");\n\nclass Resource {\n    constructor(callback) {\n        this.callback = callback;\n    }\n\n    destructor() {\n        this.callback();\n    }\n}\n\nclass ArgumentMap {\n    constructor(schema) {\n        Object.getOwnPropertyNames(schema).forEach(key => {\n            if (schema[key] instanceof Argument || schema[key] instanceof ArgumentMap) {\n                return;\n            }\n            schema[key] = new Argument(schema[key]);\n        });\n        this.Schema = schema;\n    }\n\n    eval(data) {\n        if (data === undefined || data === null) {\n            data = {};\n        }\n\n        if (typeof data !== \"object\") {\n            throw new Error(\"Data should by type of map\");\n        }\n\n        Object.getOwnPropertyNames(this.Schema).forEach(key => {\n            try {\n                data[key] = this.Schema[key].eval(data[key]);\n            } catch (e) {\n                throw new Error(`Field '${key}': ${e.message}`);\n            }\n        });\n\n        return data;\n    }\n}\n\nclass Argument {\n    constructor(schema, field) {\n        this.field = field;\n        schema = Object.assign({\n            required: false,\n            default: undefined,\n            type: undefined,\n            min: undefined,\n            max: undefined,\n            array: false,\n            arraySizeMin: undefined,\n            arraySizeMax: undefined\n        }, schema);\n        this.schema = schema;\n    }\n\n    eval(data) {\n        if (data === undefined && this.schema.default !== undefined) {\n            data = this.schema.default;\n        }\n\n        if ((data === undefined || data === null) && this.schema.required) {\n            throw new Error(`${this.field} is required`);\n        }\n\n        if (this.schema.array) {\n            if (!Array.isArray(data)) {\n                throw new Error(`${this.field} must be type of array`);\n            }\n\n            if (this.schema.arraySizeMin && data.length < this.schema.arraySizeMin) {\n                throw new Error(`${this.field} array must have at least ${this.schema.arraySizeMin} element`);\n            }\n\n            if (this.schema.arraySizeMax && data.length > this.schema.arraySizeMax) {\n                throw new Error(`${this.field} array must have at most ${this.schema.arraySizeMax} element`);\n            }\n\n            data.forEach((value, index) => {\n                try {\n                    this.validateElement(value);\n                } catch (e) {\n                    throw new Error(`${ this.field } array element #${index}: ${e.message}`);\n                }\n            });\n        } else {\n            if (data !== undefined) {\n                this.validateElement(data);\n            }\n        }\n\n        return data;\n    }\n\n    validateElement(data) {\n        if (this.schema.type === undefined) return;\n\n        if (!(typeof this.schema.type === \"string\")) {\n            if (!(data instanceof this.schema.type)) {\n                throw new Error(\"Data must be instance of \" + this.schema.type.prototype.constructor.name);\n            }\n        } else switch (this.schema.type) {\n            case \"text\":\n            case \"string\": {\n                if (typeof data !== \"string\") {\n                    throw new Error(\"Data must be type of string\");\n                }\n                break;\n            }\n            case \"number\": {\n                if (typeof data !== \"number\") {\n                    throw new Error(\"Data must be type of number\");\n                }\n\n                if (this.schema.min && data < this.schema.min) {\n                    throw new Error(\"Data must be at least \" + this.schema.min);\n                }\n\n                if (this.schema.max && data > this.schema.max) {\n                    throw new Error(\"Data must be at most \" + this.schema.max);\n                }\n                break;\n            }\n            case \"bool\":\n            case \"boolean\": {\n                if (typeof data !== \"boolean\") {\n                    throw new Error(\"Data must be type of boolean\");\n                }\n                break;\n            }\n            default: {\n                let options = this.schema.type.split(\"|\");\n                if (!options.find(o => o === data)) {\n                    throw new Error(`Data (${data}) must be type of string and one of the following options: ${options}`);\n                }\n            }\n        }\n    }\n}\n\nclass EventEmitter extends events.EventEmitter {\n    constructor() {\n        super();\n    }\n\n    On(event, callback) {\n        this.on(event, callback);\n        return new Resource(() => this.off(event, callback));\n    }\n}\n\nclass Base extends EventEmitter {\n    static Resource = Resource;\n    static Argument = Argument;\n    static ArgumentMap = ArgumentMap;\n\n    resources = [];\n\n    init(args = {}) {\n        Object.getOwnPropertyNames(this).forEach(key => {\n            if (this[key] instanceof Argument || this[key] instanceof ArgumentMap) {\n                this[key] = this[key].eval(args[key], key);\n            }\n        });\n    }\n\n    destructor() {\n        this.resources.forEach(resource => {\n            try {\n                if (Array.isArray(resource)) {\n                    resource.forEach(r => r.destructor());\n                } else {\n                    resource.destructor();\n                }\n            } catch (e) { }\n        });\n    }\n}\n\n$.register(\"Base\", Base);\n$.register(\"EventEmitter\", EventEmitter);\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "libs": [],
-        "x": 115,
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 230,
         "y": 40,
         "wires": [
-            []
-        ],
-        "l": false
+            [
+                "7829eb2fa756222a"
+            ]
+        ]
     },
     {
         "id": "387c4c2422591430",
@@ -397,186 +214,393 @@
         ]
     },
     {
-        "id": "50dd3bd392e226e0",
+        "id": "ffb5227f5ff229e9",
         "type": "subflow",
-        "name": "Registry",
+        "name": "Property",
         "info": "",
         "category": "Registry",
-        "in": [],
-        "out": [
+        "in": [
             {
-                "x": 580,
+                "x": 40,
                 "y": 40,
                 "wires": [
                     {
-                        "id": "3496626a2be3fa42",
+                        "id": "fbd74d94dc726844"
+                    }
+                ]
+            }
+        ],
+        "out": [],
+        "env": [
+            {
+                "name": "path",
+                "type": "str",
+                "value": ""
+            }
+        ],
+        "meta": {},
+        "color": "#FFFFFF",
+        "icon": "node-red/comment.svg",
+        "status": {
+            "x": 200,
+            "y": 100,
+            "wires": [
+                {
+                    "id": "7e218dc0a6e067ea",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "fbd74d94dc726844",
+        "type": "function",
+        "z": "ffb5227f5ff229e9",
+        "name": "Subscribe",
+        "func": "let $ = global.get(\"registry\");\nlet target = await $.getInstance(msg.payload);\n\nconst expand = (obj, path) => path.split(\".\").reduce((r, k) => r?.[k], obj);\n\ntarget = expand(target, env.get(\"path\"))\ntarget.on(\"status\", data => node.status(data));\nnode.status(target.status);",
+        "outputs": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 160,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "7e218dc0a6e067ea",
+        "type": "status",
+        "z": "ffb5227f5ff229e9",
+        "name": "",
+        "scope": [
+            "fbd74d94dc726844"
+        ],
+        "x": 80,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6921f1f3fbfe8775",
+        "type": "subflow",
+        "name": "Set",
+        "info": "",
+        "category": "Registry",
+        "in": [
+            {
+                "x": 40,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "8c32106737a3832c"
+                    }
+                ]
+            }
+        ],
+        "out": [],
+        "env": [
+            {
+                "name": "node",
+                "type": "str",
+                "value": ""
+            },
+            {
+                "name": "path",
+                "type": "str",
+                "value": ""
+            },
+            {
+                "name": "mode",
+                "type": "str",
+                "value": "command",
+                "ui": {
+                    "type": "select",
+                    "opts": {
+                        "opts": [
+                            {
+                                "l": {
+                                    "en-US": "Command"
+                                },
+                                "v": "command"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "Set"
+                                },
+                                "v": "set"
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "meta": {},
+        "color": "#F3B567",
+        "icon": "font-awesome/fa-wrench"
+    },
+    {
+        "id": "61690c152b0059d3",
+        "type": "function",
+        "z": "6921f1f3fbfe8775",
+        "name": "Node",
+        "func": "let $ = global.get(\"registry\");\nconst expand = (obj, path) => path.split(\".\").reduce((r, k) => r?.[k], obj);\n\nlet target = await $.getInstance(env.get(\"node\"));\ntarget = expand(target, env.get(\"path\"))\n\nflow.set(\"target\", target);",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 150,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8c32106737a3832c",
+        "type": "function",
+        "z": "6921f1f3fbfe8775",
+        "name": "Trigger",
+        "func": "let target = flow.get(\"target\");\n\nif (!target) return null;\n\nif (env.get(\"mode\") === \"command\")\n    target.command(msg.payload);\nelse\n    target.set(msg.payload);",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 150,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bc3a6b338c07c4f1",
+        "type": "subflow:2f546c91f509d875",
+        "z": "6921f1f3fbfe8775",
+        "name": "",
+        "x": 35,
+        "y": 40,
+        "wires": [
+            [
+                "61690c152b0059d3"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "2f546c91f509d875",
+        "type": "subflow",
+        "name": "Initialized",
+        "info": "",
+        "category": "Registry",
+        "in": [
+            {
+                "x": 40,
+                "y": 40,
+                "wires": [
+                    {
+                        "id": "d0b553f88ea4af86"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 200,
+                "y": 40,
+                "wires": [
+                    {
+                        "id": "d7871eaf306d0121",
+                        "port": 0
+                    },
+                    {
+                        "id": "d0b553f88ea4af86",
                         "port": 0
                     }
                 ]
             }
         ],
-        "env": [],
+        "env": [
+            {
+                "name": "trigger",
+                "type": "bool",
+                "value": "true",
+                "ui": {
+                    "label": {
+                        "en-US": "Send initial message"
+                    },
+                    "type": "checkbox"
+                }
+            }
+        ],
         "meta": {},
         "color": "#3FADB5",
-        "icon": "font-awesome/fa-cubes"
+        "icon": "font-awesome/fa-hourglass-start"
     },
     {
-        "id": "b15f018fae453d3b",
+        "id": "d7871eaf306d0121",
         "type": "function",
-        "z": "50dd3bd392e226e0",
-        "name": "Registry",
+        "z": "2f546c91f509d875",
+        "name": "Init",
         "func": "",
         "outputs": 1,
         "noerr": 0,
-        "initialize": "global.set(\"registry\", null);\n\nclass AsyncStore {\n    Items = {};\n    ItemsPromises = {};\n    ItemsResolvers = {};\n\n    Add(id, item) {\n        this.Items[id] = item;\n\n        if (id in this.ItemsPromises) {\n            this.ItemsResolvers[id].resolve(item);\n            delete this.ItemsPromises[id];\n            delete this.ItemsResolvers[id];\n        }\n    }\n\n    Get(id) {\n        if (id in this.Items) {\n            return Promise.resolve(this.Items[id]);\n        }\n        if (id in this.ItemsPromises) {\n            return this.ItemsPromises[id];\n        }\n\n        let promise = new Promise((resolve, reject) => {\n            this.ItemsResolvers[id] = {\n                resolve: resolve,\n                reject: reject,\n            }\n        });\n\n        this.ItemsPromises[id] = promise;\n        return promise;\n    }\n}\n\nclass Registry {\n    Types = new AsyncStore();\n    Instances = new AsyncStore();\n\n    register(id, type) {\n        this.Types.Add(id, type);\n    }\n\n    get(id) {\n        return Promise.race([\n            this.Types.Get(id),\n            new Promise((resolve, reject) => {\n                setTimeout(() => reject(`Type not found: ${id}`), 5000);\n            })\n        ]);\n    }\n\n    getAll(...ids) {\n        let promises = [];\n        ids.forEach(id => promises.push(this.get(id)));\n        return Promise.all(promises);\n    }\n\n    registerInstance(id, instance) {\n        this.Instances.Add(id, instance);\n    }\n\n    getInstance(id) {\n        return this.Instances.Get(id);\n    }\n\n    async resolveDependencies(instance) {\n        let promises = [];\n\n        for (const key in instance) {\n            if (instance[key] instanceof this.Require === false) continue;\n            \n            promises.push(\n                this.getInstance(instance[key].id)\n                    .then(target => instance[key] = target)\n            );\n        }\n\n        await Promise.all(promises);\n        return instance;\n    }\n\n    Require = class {\n        constructor(id) {\n            this.id = id;\n        }\n    }\n}\n\nlet registry = new Registry();\nglobal.set(\"registry\", registry);\nnode.send({});",
+        "initialize": "let interval;\n\ninterval = setInterval(() => {\n    let $ = global.get(\"registry\");\n    if ($ !== null && $ !== undefined) {\n        clearInterval(interval);\n        if (env.get(\"trigger\"))\n            node.send({});\n        let buffer = flow.get(\"buffer\") || [];\n        buffer.forEach(msg => node.send(msg));\n    }\n}, 100);",
         "finalize": "",
-        "libs": [
-            {
-                "var": "events",
-                "module": "events"
-            }
-        ],
-        "x": 80,
-        "y": 40,
-        "wires": [
-            [
-                "3d1b29e26135f3fc"
-            ]
-        ]
-    },
-    {
-        "id": "7829eb2fa756222a",
-        "type": "function",
-        "z": "50dd3bd392e226e0",
-        "name": "Node",
-        "func": "let $ = global.get(\"registry\");\nlet Base = await $.get(\"Base\");\n\nclass Plugin extends Base {\n    target = new Base.Argument({required: true});\n}\n\nclass PluginDescriptor {\n    constructor(type, args) {\n        this.type = type;\n        this.args = args;\n    }\n}\n\nclass Status {\n    constructor(node) {\n        this.node = node;\n    }\n\n    green(text = \"\") {\n        this.node.status({ shape: \"dot\", fill: \"green\", text: text });\n    }\n    \n    yellow(text = \"\") {\n        this.node.status({ shape: \"dot\", fill: \"yellow\", text: text });\n    }\n\n    red(text = \"\") { \n        this.node.status({ shape: \"ring\", fill: \"red\", text: text });\n    }\n\n    clear() { \n        this.node.status({ shape: \"\", fill: \"\", text: \"\" });\n    }\n}\n\nclass Log {\n    constructor(node, debug) {\n        this. node = node;\n        this.debug = debug;\n    }\n\n    debug(object) { \n        if (this.debug) \n            this.node.warn({ object }); \n    }\n\n    warning(object) { \n        this.node.warn({ object });\n    }\n\n    error(object) { \n        this.node.error({ object });\n    }\n}\n\nclass Node extends Base {\n    static Plugin = PluginDescriptor;\n    \n    log;\n    status;\n    node = new Base.Argument({required: true});  \n    \n    init(args) {\n        super.init(args);\n        \n        if (this.node instanceof Node) {\n            this.node = this.node.node;\n        }\n\n        this.status = new Status(this.node);\n        this.log = new Log(this.node, this.debug);\n\n        Object.getOwnPropertyNames(this).forEach(key => {\n            if (this[key] instanceof PluginDescriptor) {\n                let pluginDescriptor = this[key];\n                this[key] = new pluginDescriptor.type();\n                this[key].init(\n                    Object.assign(\n                        {},\n                        pluginDescriptor.args,\n                        { target: this }\n                    )\n                );\n                this.resources.push(new Base.Resource(() => this[key].destructor()));\n            }\n        });\n\n        this.node.on('close', () => {\n            this.destructor();\n        });\n    }\n}\n\n$.register(\"Node\", Node);\n$.register(\"Plugin\", Plugin);\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [
-            {
-                "var": "events",
-                "module": "events"
-            }
-        ],
-        "x": 230,
+        "libs": [],
+        "x": 70,
         "y": 80,
         "wires": [
-            [
-                "3496626a2be3fa42"
-            ]
-        ]
-    },
-    {
-        "id": "3496626a2be3fa42",
-        "type": "function",
-        "z": "50dd3bd392e226e0",
-        "name": "Property",
-        "func": "let $ = global.get(\"registry\");\nlet EventEmitter = await $.get(\"EventEmitter\");\n\nclass PropertyGroup extends EventEmitter {\n    debounceTimer = null;\n    debounceMillis = 50;\n    status = { fill: \"yellow\", shape: \"dot\", text: \"initializing...\" };\n\n    constructor(properties = {}) {\n        super();\n        Object.getOwnPropertyNames(properties)\n            .forEach(propertyName => {\n                this.add(propertyName, properties[propertyName]);\n            });\n    }\n\n    add(name, property) {\n        this[name] = property;\n        property.on(\"updated\", () => this.emit(\"updated\", null));\n        property.on(\"changed\", () => {\n            if (this.debounceTimer) clearTimeout(this.debounceTimer);\n            this.debounceTimer = setTimeout(() => {\n                this.changed();\n                this.emit(\"changed\", null);\n            }, this.debounceMillis);\n        });\n    }\n\n    changed() {\n    }\n\n    red(text = '') {\n        this.status = {\n            fill: \"red\",\n            shape: \"ring\",\n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n\n    green(text = '') {\n        this.status = {\n            fill: \"green\",\n            shape: \"dot\",\n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n}\n\nclass Property extends EventEmitter {\n    static Group = PropertyGroup;\n\n    value = null;\n    status = {fill: \"green\", shape: \"dot\", text: \"\"};\n\n    get () {\n        return this.value;\n    }\n\n    set (value) {\n        if (this.value !== value) {\n            let oldValue = this.value;\n            this.value = value;\n            try {\n            this.changed(value);\n            this.emit(\"changed\", { source: this, from: oldValue, to: value, at: null });\n            } catch (e) {node.error(e.stack);}\n        }\n\n        this.emit(\"updated\", { source: this, from: value, to: value, at: null });\n    }\n\n    changed(value) {\n    }\n\n    command (value) {\n        this.emit(\"command\", value);\n    }\n\n    red(text = '') {\n        this.status = {\n            fill: \"red\",\n            shape: \"ring\",\n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n\n    green(text = '') {\n        this.status = {\n            fill: \"green\", \n            shape: \"dot\", \n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n}\n\n$.register(\"Property\", Property);\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [
-            {
-                "var": "events",
-                "module": "events"
-            }
-        ],
-        "x": 420,
-        "y": 40,
-        "wires": [
             []
         ]
     },
     {
-        "id": "3d1b29e26135f3fc",
+        "id": "d0b553f88ea4af86",
         "type": "function",
-        "z": "50dd3bd392e226e0",
-        "name": "Base",
-        "func": "let $ = global.get(\"registry\");\n\nclass Resource {\n    constructor(callback) {\n        this.callback = callback;\n    }\n\n    destructor() {\n        this.callback();\n    }\n}\n\nclass ArgumentMap {\n    constructor(schema) {\n        Object.getOwnPropertyNames(schema).forEach(key => {\n            if (schema[key] instanceof Argument || schema[key] instanceof ArgumentMap) {\n                return;\n            }\n            schema[key] = new Argument(schema[key]);\n        });\n        this.Schema = schema;\n    }\n\n    eval(data) {\n        if (data === undefined || data === null) {\n            data = {};\n        }\n\n        if (typeof data !== \"object\") {\n            throw new Error(\"Data should by type of map\");\n        }\n\n        Object.getOwnPropertyNames(this.Schema).forEach(key => {\n            try {\n                data[key] = this.Schema[key].eval(data[key]);\n            } catch (e) {\n                throw new Error(`Field '${key}': ${e.message}`);\n            }\n        });\n\n        return data;\n    }\n}\n\nclass Argument {\n    constructor(schema, field) {\n        this.field = field;\n        schema = Object.assign({\n            required: false,\n            default: undefined,\n            type: undefined,\n            min: undefined,\n            max: undefined,\n            array: false,\n            arraySizeMin: undefined,\n            arraySizeMax: undefined\n        }, schema);\n        this.schema = schema;\n    }\n\n    eval(data) {\n        if (data === undefined && this.schema.default !== undefined) {\n            data = this.schema.default;\n        }\n\n        if ((data === undefined || data === null) && this.schema.required) {\n            throw new Error(`${this.field} is required`);\n        }\n\n        if (this.schema.array) {\n            if (!Array.isArray(data)) {\n                throw new Error(`${this.field} must be type of array`);\n            }\n\n            if (this.schema.arraySizeMin && data.length < this.schema.arraySizeMin) {\n                throw new Error(`${this.field} array must have at least ${this.schema.arraySizeMin} element`);\n            }\n\n            if (this.schema.arraySizeMax && data.length > this.schema.arraySizeMax) {\n                throw new Error(`${this.field} array must have at most ${this.schema.arraySizeMax} element`);\n            }\n\n            data.forEach((value, index) => {\n                try {\n                    this.validateElement(value);\n                } catch (e) {\n                    throw new Error(`${ this.field } array element #${index}: ${e.message}`);\n                }\n            });\n        } else {\n            if (data !== undefined) {\n                this.validateElement(data);\n            }\n        }\n\n        return data;\n    }\n\n    validateElement(data) {\n        if (this.schema.type === undefined) return;\n\n        if (!(typeof this.schema.type === \"string\")) {\n            if (!(data instanceof this.schema.type)) {\n                throw new Error(\"Data must be instance of \" + this.schema.type.prototype.constructor.name);\n            }\n        } else switch (this.schema.type) {\n            case \"text\":\n            case \"string\": {\n                if (typeof data !== \"string\") {\n                    throw new Error(\"Data must be type of string\");\n                }\n                break;\n            }\n            case \"number\": {\n                if (typeof data !== \"number\") {\n                    throw new Error(\"Data must be type of number\");\n                }\n\n                if (this.schema.min && data < this.schema.min) {\n                    throw new Error(\"Data must be at least \" + this.schema.min);\n                }\n\n                if (this.schema.max && data > this.schema.max) {\n                    throw new Error(\"Data must be at most \" + this.schema.max);\n                }\n                break;\n            }\n            case \"bool\":\n            case \"boolean\": {\n                if (typeof data !== \"boolean\") {\n                    throw new Error(\"Data must be type of boolean\");\n                }\n                break;\n            }\n            default: {\n                let options = this.schema.type.split(\"|\");\n                if (!options.find(o => o === data)) {\n                    throw new Error(`Data (${data}) must be type of string and one of the following options: ${options}`);\n                }\n            }\n        }\n    }\n}\n\nclass EventEmitter extends events.EventEmitter {\n    constructor() {\n        super();\n    }\n\n    On(event, callback) {\n        this.on(event, callback);\n        return new Resource(() => this.off(event, callback));\n    }\n}\n\nclass Base extends EventEmitter {\n    static Resource = Resource;\n    static Argument = Argument;\n    static ArgumentMap = ArgumentMap;\n\n    resources = [];\n\n    init(args = {}) {\n        Object.getOwnPropertyNames(this).forEach(key => {\n            if (this[key] instanceof Argument || this[key] instanceof ArgumentMap) {\n                this[key] = this[key].eval(args[key], key);\n            }\n        });\n    }\n\n    destructor() {\n        this.resources.forEach(resource => {\n            try {\n                if (Array.isArray(resource)) {\n                    resource.forEach(r => r.destructor());\n                } else {\n                    resource.destructor();\n                }\n            } catch (e) { }\n        });\n    }\n}\n\n$.register(\"Base\", Base);\n$.register(\"EventEmitter\", EventEmitter);\n\nreturn msg;",
+        "z": "2f546c91f509d875",
+        "name": "Buffer",
+        "func": "let registry = global.get(\"registry\");\nif (registry) return msg;\n\nlet buffer = flow.get(\"buffer\") || [];\nbuffer.push(msg);\nflow.set(\"buffer\", buffer);\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "libs": [
-            {
-                "var": "events",
-                "module": "events"
-            }
-        ],
-        "x": 230,
-        "y": 40,
-        "wires": [
-            [
-                "7829eb2fa756222a"
-            ]
-        ]
-    },
-    {
-        "id": "b1aeec09ecaed64f",
-        "type": "subflow:50dd3bd392e226e0",
-        "z": "e842d50887889072",
-        "name": "",
+        "libs": [],
         "x": 115,
-        "y": 340,
+        "y": 40,
         "wires": [
             []
         ],
         "l": false
     },
     {
-        "id": "4dd2569b5090df66",
-        "type": "subflow:387c4c2422591430",
-        "z": "e842d50887889072",
-        "name": "",
-        "x": 165,
-        "y": 340,
-        "wires": [
-            []
+        "id": "879948f81429fbc8",
+        "type": "subflow",
+        "name": "Changed",
+        "info": "",
+        "category": "Registry",
+        "in": [],
+        "out": [
+            {
+                "x": 260,
+                "y": 40,
+                "wires": [
+                    {
+                        "id": "4d91d53ef6912666",
+                        "port": 0
+                    }
+                ]
+            }
         ],
-        "l": false
+        "env": [
+            {
+                "name": "node",
+                "type": "str",
+                "value": ""
+            },
+            {
+                "name": "path",
+                "type": "str",
+                "value": ""
+            }
+        ],
+        "meta": {},
+        "color": "#F3B567",
+        "icon": "font-awesome/fa-flash"
     },
     {
-        "id": "ea7c24b311158794",
+        "id": "4d91d53ef6912666",
+        "type": "function",
+        "z": "879948f81429fbc8",
+        "name": "Node",
+        "func": "let $ = global.get(\"registry\");\nconst expand = (obj, path) => path.split(\".\").reduce((r, k) => r?.[k], obj);\n\nlet target = await $.getInstance(env.get(\"node\"));\ntarget = expand(target, env.get(\"path\"))\n\ntarget.on(\"changed\", data => {\n    node.send({payload: data.to});\n});",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 150,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2ce0cc56fde999bd",
         "type": "subflow:2f546c91f509d875",
-        "z": "e842d50887889072",
+        "z": "879948f81429fbc8",
         "name": "",
-        "x": 215,
-        "y": 340,
+        "x": 35,
+        "y": 40,
+        "wires": [
+            [
+                "4d91d53ef6912666"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "9cf9ffa7a4f81567",
+        "type": "subflow:879948f81429fbc8",
+        "z": "445c4687a8d966bb",
+        "name": "",
+        "x": 135,
+        "y": 320,
         "wires": [
             []
         ],
         "l": false
     },
     {
-        "id": "945588601a0dd74b",
-        "type": "subflow:ffb5227f5ff229e9",
-        "z": "e842d50887889072",
-        "name": "",
-        "x": 115,
-        "y": 380,
-        "wires": [],
-        "l": false
-    },
-    {
-        "id": "4c085bd139d2de72",
+        "id": "18250bd444efec9f",
         "type": "subflow:6921f1f3fbfe8775",
-        "z": "e842d50887889072",
+        "z": "445c4687a8d966bb",
         "name": "",
-        "x": 165,
-        "y": 380,
+        "x": 185,
+        "y": 320,
         "wires": [],
         "l": false
     },
     {
-        "id": "b6daf72af6ce0647",
-        "type": "subflow:879948f81429fbc8",
-        "z": "e842d50887889072",
+        "id": "9e2f1f7db97e2cd1",
+        "type": "subflow:ffb5227f5ff229e9",
+        "z": "445c4687a8d966bb",
         "name": "",
-        "x": 215,
-        "y": 380,
+        "x": 235,
+        "y": 320,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "7965b2fd589a2c49",
+        "type": "subflow:2f546c91f509d875",
+        "z": "445c4687a8d966bb",
+        "name": "",
+        "x": 135,
+        "y": 360,
+        "wires": [
+            []
+        ],
+        "l": false
+    },
+    {
+        "id": "80f353b006c56cdf",
+        "type": "subflow:387c4c2422591430",
+        "z": "445c4687a8d966bb",
+        "name": "",
+        "x": 235,
+        "y": 360,
+        "wires": [
+            []
+        ],
+        "l": false
+    },
+    {
+        "id": "1e7f9ccaa3061a2f",
+        "type": "subflow:50dd3bd392e226e0",
+        "z": "445c4687a8d966bb",
+        "name": "",
+        "x": 185,
+        "y": 360,
         "wires": [
             []
         ],
