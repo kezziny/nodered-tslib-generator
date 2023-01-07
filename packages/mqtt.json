@@ -1,0 +1,81 @@
+[
+    {
+        "id": "9642c42181d7c51a",
+        "type": "subflow",
+        "name": "Mqtt",
+        "info": "",
+        "category": "Packages",
+        "in": [
+            {
+                "x": 40,
+                "y": 40,
+                "wires": [
+                    {
+                        "id": "5981994ffac678a2"
+                    }
+                ]
+            }
+        ],
+        "out": [],
+        "env": [],
+        "meta": {},
+        "color": "#880088",
+        "icon": "node-red/bridge.svg"
+    },
+    {
+        "id": "5981994ffac678a2",
+        "type": "function",
+        "z": "9642c42181d7c51a",
+        "name": "MqttService",
+        "func": "let $ = global.get(\"registry\");\nlet Node = await $.get(\"Node\");\nlet Property = await $.get(\"Property\");\n\nconst expand = (obj, path) => path.split(\".\").reduce((r, k) => r?.[k], obj);\nconst subscriptionSchema = new Node.ArgumentMap({\n    topic: {required: true, type: \"string\"},\n    callback: {required: true},\n});\n\nconst publishSchema = new Node.ArgumentMap({\n    topic: { required: true, type: \"string\" },\n    payload: { required: true },\n    retain: { required: true, default: false, type: \"boolean\" },\n});\n\nclass MqttService extends Node {\n    Client;\n\n    host = new Node.Argument({ required: true, type: \"string\" });\n\n    init(args) {\n        super.init(args);\n\n        this.status.yellow();\n        this.Client = mqtt.connect(this.host);\n        this.Client.on('connect', () => this.status.green());\n        this.Client.on('message', (topic, msg) => this.onMessage(topic, msg))\n    }\n\n    onMessage(topic, message) {\n        try {\n            let msg = JSON.parse(message.toString());\n            this.emit(topic, msg);\n        } catch (e) {\n            node.error(e);\n            node.error(e.stack);\n        }\n    }\n\n    subscribe(args) {\n        args = subscriptionSchema.eval(args);\n        this.Client.subscribe(args.topic);\n        return super.On(args.topic, args.callback);\n    }\n\n    publish(args) {\n        args = publishSchema.eval(args);\n        this.Client.publish(args.topic, JSON.stringify(args.payload), {retain: args.retain});\n    }\n    \n    destructor() {\n        this.Client.end();\n        super.destructor();\n    }\n}\n\n$.register(\"Mqtt.Service\", MqttService);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "mqtt",
+                "module": "mqtt"
+            }
+        ],
+        "x": 170,
+        "y": 40,
+        "wires": [
+            [
+                "637705a9d6fa7d2a"
+            ]
+        ]
+    },
+    {
+        "id": "637705a9d6fa7d2a",
+        "type": "function",
+        "z": "9642c42181d7c51a",
+        "name": "MqttPlugin",
+        "func": "let $ = global.get(\"registry\");\nlet Plugin = await $.get(\"Plugin\");\n\nlet MqttService = await $.get(\"Mqtt.Service\");\n\nlet Property = await $.get(\"Property\");\n\nconst expand = (obj, path) => path.split(\".\").reduce((r, k) => r?.[k], obj);\n\nclass MqttPlugin extends Plugin {\n    mqttService = new Plugin.Argument({required: true, type: MqttService});\n\n    subscribe_(topic, callback) {\n        this.resources.push(this.mqttService.subscribe({topic, callback}));\n    }\n\n    subscribeProperty(args) {\n        // topic -> .set, .command -> /set\n        args = propertySchema.eval(args);\n\n        this.resources.push(\n            args.property.On(\"command\", command => {\n                let payload = {};\n                payload[args.name] = args.outgoingConverter(command);\n                this.mqttService.publish({\n                    topic: `${args.topic}/set`,\n                    payload,\n                    retain: args.retain\n                });\n            })\n        )\n\n        this.subscribe_(args.topic, payload => {\n            if (payload.hasOwnProperty(args.name)) {\n                args.property.set(args.incomingConverter(payload[args.name]));\n            }\n        });\n    }\n\n    subscribe(args) {\n        // /->set, .command -> /set\n        args = groupSchema.eval(args);\n\n        for (const key in args.group) {\n            if (args.group[key] instanceof Property === false) continue;\n\n            this.subscribeProperty(\n                Object.assign({\n                        topic: args.topic,\n                        name: key,\n                        property: args.group[key],\n                        retain: args.retain\n                    },\n                    args.properties[key]\n                )\n            );\n        }\n    }\n\n    publish(args) {\n        // .changed -> /, /set -> .command\n        args = groupSchema.eval(args);\n        let resources = [];\n\n        for (const key in args.group) {\n            if (args.group[key] instanceof Property === false) continue;\n\n            args.properties[key] = propertyParserSchema.eval(args.properties[key]);\n        }\n\n        resources.push(\n            args.group.On(\"changed\", () => {\n                let message = {};\n                for (const key in args.group) {\n                    if (args.group[key] instanceof Property === false) continue;\n                    \n                    message[key] = args.properties[key].outgoingConverter(args.group[key].value);\n                }\n\n                this.mqttService.publish({ topic: args.topic, payload: message, retain: args.retain });\n            })\n        );\n\n        this.subscribe_(`${args.topic}/set`,\n            payload => {\n                for (const key in payload) {\n                    if (!args.properties.hasOwnProperty(key)) continue;\n\n                    args.group[key].command(args.properties[key].incomingConverter(payload[key]));\n                }\n            }\n        )\n    }\n}\n\nconst groupSchema = new Plugin.ArgumentMap({\n    topic: { required: true, type: \"string\" },\n    group: { required: true, type: Property.Group },\n    retain: { required: true, default: false, type: \"boolean\" },\n    properties: { required: true, default: {} },\n});\nconst propertySchema = new Plugin.ArgumentMap({\n    topic: { required: true, type: \"string\" },\n    property: { required: true, type: Property },\n    name: new Plugin.Argument({ required: true, type: \"string\" }),\n    incomingConverter: new Plugin.Argument({ required: true, default: (arg) => arg }),\n    outgoingConverter: new Plugin.Argument({ required: true, default: (arg) => arg }),\n    retain: { required: true, default: false, type: \"boolean\" },\n});\nlet propertyParserSchema = new Plugin.ArgumentMap({\n    name: new Plugin.Argument({ required: false, type: \"string\" }),\n    incomingConverter: new Plugin.Argument({ required: true, default: (arg) => arg }),\n    outgoingConverter: new Plugin.Argument({ required: true, default: (arg) => arg }),\n});\n\n$.register(\"Mqtt.Plugin\", MqttPlugin);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "mqtt",
+                "module": "mqtt"
+            }
+        ],
+        "x": 350,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0ab74c2eeafc60dc",
+        "type": "subflow:9642c42181d7c51a",
+        "z": "e842d50887889072",
+        "name": "",
+        "x": 155,
+        "y": 340,
+        "wires": [],
+        "l": false
+    }
+]
