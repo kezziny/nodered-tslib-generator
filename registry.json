@@ -501,6 +501,30 @@
                 "name": "path",
                 "type": "str",
                 "value": ""
+            },
+            {
+                "name": "mode",
+                "type": "str",
+                "value": "changed",
+                "ui": {
+                    "type": "select",
+                    "opts": {
+                        "opts": [
+                            {
+                                "l": {
+                                    "en-US": "Changed"
+                                },
+                                "v": "changed"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "Command"
+                                },
+                                "v": "command"
+                            }
+                        ]
+                    }
+                }
             }
         ],
         "meta": {},
@@ -512,7 +536,7 @@
         "type": "function",
         "z": "879948f81429fbc8",
         "name": "Node",
-        "func": "let $ = global.get(\"registry\");\nconst expand = (obj, path) => path.split(\".\").reduce((r, k) => r?.[k], obj);\n\nlet target = await $.getInstance(env.get(\"node\"));\ntarget = expand(target, env.get(\"path\"))\n\ntarget.on(\"changed\", data => {\n    node.send({payload: data.to});\n});",
+        "func": "let $ = global.get(\"registry\");\nconst expand = (obj, path) => path.split(\".\").reduce((r, k) => r?.[k], obj);\n\nlet target = await $.getInstance(env.get(\"node\"));\ntarget = expand(target, env.get(\"path\"))\n\ntarget.on(env.get(\"mode\"), data => {\n    if (env.get(\"mode\") === \"changed\") data = data.to;\n    node.send({payload: data});\n});",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -539,68 +563,68 @@
         "l": false
     },
     {
-        "id": "9cf9ffa7a4f81567",
+        "id": "39f787a95ab13d80",
         "type": "subflow:879948f81429fbc8",
-        "z": "445c4687a8d966bb",
+        "z": "115fa01b867da3b7",
         "name": "",
-        "x": 135,
-        "y": 320,
+        "x": 35,
+        "y": 40,
         "wires": [
             []
         ],
         "l": false
     },
     {
-        "id": "18250bd444efec9f",
+        "id": "6d9d7542c01cafca",
         "type": "subflow:6921f1f3fbfe8775",
-        "z": "445c4687a8d966bb",
+        "z": "115fa01b867da3b7",
         "name": "",
-        "x": 185,
-        "y": 320,
+        "x": 95,
+        "y": 40,
         "wires": [],
         "l": false
     },
     {
-        "id": "9e2f1f7db97e2cd1",
+        "id": "640c48c1831986af",
         "type": "subflow:ffb5227f5ff229e9",
-        "z": "445c4687a8d966bb",
+        "z": "115fa01b867da3b7",
         "name": "",
-        "x": 235,
-        "y": 320,
+        "x": 155,
+        "y": 40,
         "wires": [],
         "l": false
     },
     {
-        "id": "7965b2fd589a2c49",
+        "id": "1570dd7a319684f0",
         "type": "subflow:2f546c91f509d875",
-        "z": "445c4687a8d966bb",
+        "z": "115fa01b867da3b7",
         "name": "",
-        "x": 135,
-        "y": 360,
+        "x": 35,
+        "y": 80,
         "wires": [
             []
         ],
         "l": false
     },
     {
-        "id": "80f353b006c56cdf",
+        "id": "131b3f30ab2ce0e6",
         "type": "subflow:387c4c2422591430",
-        "z": "445c4687a8d966bb",
+        "z": "115fa01b867da3b7",
         "name": "",
-        "x": 235,
-        "y": 360,
+        "x": 155,
+        "y": 80,
         "wires": [
             []
         ],
         "l": false
     },
     {
-        "id": "1e7f9ccaa3061a2f",
+        "id": "ad7297b549e04189",
         "type": "subflow:50dd3bd392e226e0",
-        "z": "445c4687a8d966bb",
+        "z": "115fa01b867da3b7",
         "name": "",
-        "x": 185,
-        "y": 360,
+        "x": 95,
+        "y": 80,
         "wires": [
             []
         ],
