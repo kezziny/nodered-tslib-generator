@@ -1,4 +1,4 @@
-class Test {
+export class Test {
   constructor(cucc) {
     this.cucc = cucc;
   }
