@@ -1,12 +1,12 @@
 {
   "name": "@kezziny/js2nr",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Tool for generating Registry package for nod-red",
   "author": "kezziny",
   "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kezziny/nodered-registry.git"
+    "url": "https://github.com/kezziny/js2nr.git"
   },
   "main": "./dist/index.js",
   "scripts": {
