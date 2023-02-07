@@ -7,7 +7,7 @@ import { IFunctionNode } from 'src/interface/functionNode';
 export interface IPackageArguments {
     module: string,
     uuid: string,
-    displayName: string,
+    name: string,
     source: string;
     destination: string;
 }
@@ -24,7 +24,7 @@ export class Package {
         let sourceFiles = await this.findPackageFiles();
         let functionNodes = [];
 
-        let subflow = nodeRed.Subflow.of({id: this.args.uuid, name: this.args.displayName});
+        let subflow = nodeRed.Subflow.of({id: this.args.uuid, name: this.args.name});
         subflow.in.push({x: 40, y: 40, wires: []});
         let nodeRedJson: any[] = [subflow];
 
