@@ -1,9 +1,8 @@
 {
-  "name": "@kezziny/ts2nr",
+  "name": "@kezziny/js2nr",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
+  "description": "Tool for generating Registry package for nod-red",
+  "author": "kezziny",
   "license": "UNLICENSED",
   "main": "./dist/index.js",
   "scripts": {

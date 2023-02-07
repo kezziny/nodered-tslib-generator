@@ -1,0 +1,29 @@
+name: Test and build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 12.x
+      - name: Clean output directory
+        run: rm -r packages && mkdir packages
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
+      - name: Check if there are changes
+        id: changes
+        uses: UnicornGlobal/has-changes-action@v1.0.11
+      - name: Generated packages are differ from committed ones
+        if: steps.changes.outputs.changed == 1
+        run: exit 1
