@@ -8,11 +8,11 @@
         "in": [],
         "out": [
             {
-                "x": 580,
+                "x": 200,
                 "y": 40,
                 "wires": [
                     {
-                        "id": "3496626a2be3fa42",
+                        "id": "b15f018fae453d3b",
                         "port": 0
                     }
                 ]
@@ -42,79 +42,7 @@
         "x": 80,
         "y": 40,
         "wires": [
-            [
-                "3d1b29e26135f3fc"
-            ]
-        ]
-    },
-    {
-        "id": "7829eb2fa756222a",
-        "type": "function",
-        "z": "50dd3bd392e226e0",
-        "name": "Node",
-        "func": "let $ = global.get(\"registry\");\nlet Base = await $.get(\"Base\");\n\nclass Plugin extends Base {\n    target = new Base.Argument({required: true});\n}\n\nclass PluginDescriptor {\n    constructor(type, args) {\n        this.type = type;\n        this.args = args;\n    }\n}\n\nclass Status {\n    constructor(node) {\n        this.node = node;\n    }\n\n    green(text = \"\") {\n        this.node.status({ shape: \"dot\", fill: \"green\", text: text });\n    }\n    \n    yellow(text = \"\") {\n        this.node.status({ shape: \"dot\", fill: \"yellow\", text: text });\n    }\n\n    red(text = \"\") { \n        this.node.status({ shape: \"ring\", fill: \"red\", text: text });\n    }\n\n    clear() { \n        this.node.status({ shape: \"\", fill: \"\", text: \"\" });\n    }\n}\n\nclass Log {\n    constructor(node, debug) {\n        this. node = node;\n        this.debug = debug;\n    }\n\n    debug(object) { \n        if (this.debug) \n            this.node.warn({ object }); \n    }\n\n    warning(object) { \n        this.node.warn({ object });\n    }\n\n    error(object) { \n        this.node.error({ object });\n    }\n}\n\nclass Node extends Base {\n    static Plugin = PluginDescriptor;\n    \n    log;\n    status;\n    node = new Base.Argument({required: true});  \n    \n    init(args) {\n        super.init(args);\n        \n        if (this.node instanceof Node) {\n            this.node = this.node.node;\n        }\n\n        this.status = new Status(this.node);\n        this.log = new Log(this.node, this.debug);\n\n        Object.getOwnPropertyNames(this).forEach(key => {\n            if (this[key] instanceof PluginDescriptor) {\n                let pluginDescriptor = this[key];\n                this[key] = new pluginDescriptor.type();\n                this[key].init(\n                    Object.assign(\n                        {},\n                        pluginDescriptor.args,\n                        { target: this }\n                    )\n                );\n                this.resources.push(new Base.Resource(() => this[key].destructor()));\n            }\n        });\n\n        this.node.on('close', () => {\n            this.destructor();\n        });\n    }\n}\n\n$.register(\"Node\", Node);\n$.register(\"Plugin\", Plugin);\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [
-            {
-                "var": "events",
-                "module": "events"
-            }
-        ],
-        "x": 230,
-        "y": 80,
-        "wires": [
-            [
-                "3496626a2be3fa42"
-            ]
-        ]
-    },
-    {
-        "id": "3496626a2be3fa42",
-        "type": "function",
-        "z": "50dd3bd392e226e0",
-        "name": "Property",
-        "func": "let $ = global.get(\"registry\");\nlet EventEmitter = await $.get(\"EventEmitter\");\n\nclass PropertyGroup extends EventEmitter {\n    debounceTimer = null;\n    debounceMillis = 50;\n    status = { fill: \"yellow\", shape: \"dot\", text: \"initializing...\" };\n\n    constructor(properties = {}) {\n        super();\n        Object.getOwnPropertyNames(properties)\n            .forEach(propertyName => {\n                this.add(propertyName, properties[propertyName]);\n            });    }\n\n    add(name, property) {\n        this[name] = property;\n        property.on(\"updated\", () => this.emit(\"updated\", null));\n        property.on(\"changed\", () => {\n            if (this.debounceTimer) clearTimeout(this.debounceTimer);\n            this.debounceTimer = setTimeout(() => {\n                this.changed();\n                this.emit(\"changed\", null);\n            }, this.debounceMillis);\n        });\n    }\n\n    changed() {\n    }\n\n    red(text = '') {\n        this.status = {\n            fill: \"red\",\n            shape: \"ring\",\n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n\n    green(text = '') {\n        this.status = {\n            fill: \"green\",\n            shape: \"dot\",\n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n}\n\nclass Property extends EventEmitter {\n    static Group = PropertyGroup;\n\n    metadata = {};\n    value = null;\n    status = {fill: \"green\", shape: \"dot\", text: \"\"};\n\n    constructor(metadata) {\n        super();\n        this.metadata = metadata;\n    }\n\n    get () {\n        return this.value;\n    }\n\n    set (value) {\n        let oldValue = this.value;\n        if (this.value !== value) {\n            this.value = value;\n            try {\n            this.changed(value);\n            this.emit(\"changed\", { source: this, from: oldValue, to: value, at: null });\n            } catch (e) {node.error(e.stack);}\n        }\n\n        this.emit(\"updated\", { source: this, from: oldValue, to: value, at: null });\n    }\n\n    changed(value) {\n        this.green(\"\" + value);\n    }\n\n    command (value) {\n        this.emit(\"command\", value);\n    }\n\n    syncFrom(property) {\n        if (property instanceof Property === false) {\n            throw new Error(`Can not sync with object not instance of Property: ${property}`);\n        }\n\n        this.on(\"command\", command => property.emit(\"command\", command));\n        property.on(\"changed\", data => this.set(data.to));\n    }\n\n    red(text = '') {\n        this.status = {\n            fill: \"red\",\n            shape: \"ring\",\n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n\n    green(text = '') {\n        this.status = {\n            fill: \"green\", \n            shape: \"dot\", \n            text: text\n        };\n        this.emit(\"status\", this.status);\n    }\n}\n\n$.register(\"Property\", Property);\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [
-            {
-                "var": "events",
-                "module": "events"
-            }
-        ],
-        "x": 420,
-        "y": 40,
-        "wires": [
             []
-        ]
-    },
-    {
-        "id": "3d1b29e26135f3fc",
-        "type": "function",
-        "z": "50dd3bd392e226e0",
-        "name": "Base",
-        "func": "let $ = global.get(\"registry\");\n\nclass Resource {\n    constructor(callback) {\n        this.callback = callback;\n    }\n\n    destructor() {\n        this.callback();\n    }\n}\n\nclass ArgumentMap {\n    constructor(schema) {\n        Object.getOwnPropertyNames(schema).forEach(key => {\n            if (schema[key] instanceof Argument || schema[key] instanceof ArgumentMap) {\n                return;\n            }\n            schema[key] = new Argument(schema[key]);\n        });\n        this.Schema = schema;\n    }\n\n    eval(data) {\n        if (data === undefined || data === null) {\n            data = {};\n        }\n\n        let result = [];\n\n        if (typeof data !== \"object\") {\n            throw new Error(\"Data should by type of map\");\n        }\n\n        Object.getOwnPropertyNames(this.Schema).forEach(key => {\n            if (typeof this.Schema[key].schema.default === \"function\") return;\n            try {\n                result[key] = this.Schema[key].eval(data[key]);\n            } catch (e) {\n                throw new Error(`Field '${key}': ${e.message}`);\n            }\n        });\n\n        Object.getOwnPropertyNames(this.Schema).forEach(key => {\n            if (typeof this.Schema[key].schema.default !== \"function\") return;            \n            try {\n                result[key] = this.Schema[key].eval(data[key], data);\n            } catch (e) {\n                throw new Error(`Field '${key}': ${e.message}`);\n            }\n        });\n\n        return result;\n    }\n}\n\nclass Argument {\n    constructor(schema, field) {\n        this.field = field;\n        schema = Object.assign({\n            required: false,\n            default: undefined,\n            type: undefined,\n            min: undefined,\n            max: undefined,\n            array: false,\n            arraySizeMin: undefined,\n            arraySizeMax: undefined\n        }, schema);\n        this.schema = schema;\n    }\n\n    eval(data, context = {}) {\n        if (data === undefined && this.schema.default !== undefined) {\n            if (typeof this.schema.default === \"function\") {\n                data = this.schema.default(context);\n            } else {\n                data = this.schema.default;\n            }\n        }\n\n        if ((data === undefined || data === null) && this.schema.required) {\n            throw new Error(`${this.field} is required`);\n        }\n\n        if (this.schema.array) {\n            if (!Array.isArray(data)) {\n                throw new Error(`${this.field} must be type of array`);\n            }\n\n            if (this.schema.arraySizeMin && data.length < this.schema.arraySizeMin) {\n                throw new Error(`${this.field} array must have at least ${this.schema.arraySizeMin} element`);\n            }\n\n            if (this.schema.arraySizeMax && data.length > this.schema.arraySizeMax) {\n                throw new Error(`${this.field} array must have at most ${this.schema.arraySizeMax} element`);\n            }\n\n            data.forEach((value, index) => {\n                try {\n                    this.validateElement(value);\n                } catch (e) {\n                    throw new Error(`${ this.field } array element #${index}: ${e.message}`);\n                }\n            });\n        } else {\n            if (data !== undefined) {\n                this.validateElement(data);\n            }\n        }\n\n        return data;\n    }\n\n    validateElement(data) {\n        if (this.schema.type === undefined) return;\n\n        if (!(typeof this.schema.type === \"string\")) {\n            if (!(data instanceof this.schema.type)) {\n                throw new Error(\"Data must be instance of \" + this.schema.type.prototype.constructor.name);\n            }\n        } else switch (this.schema.type) {\n            case \"text\":\n            case \"string\": {\n                if (typeof data !== \"string\") {\n                    throw new Error(\"Data must be type of string\");\n                }\n                break;\n            }\n            case \"number\": {\n                if (typeof data !== \"number\") {\n                    throw new Error(\"Data must be type of number\");\n                }\n\n                if (this.schema.min && data < this.schema.min) {\n                    throw new Error(\"Data must be at least \" + this.schema.min);\n                }\n\n                if (this.schema.max && data > this.schema.max) {\n                    throw new Error(\"Data must be at most \" + this.schema.max);\n                }\n                break;\n            }\n            case \"bool\":\n            case \"boolean\": {\n                if (typeof data !== \"boolean\") {\n                    throw new Error(\"Data must be type of boolean\");\n                }\n                break;\n            }\n            default: {\n                let options = this.schema.type.split(\"|\");\n                if (!options.find(o => o === data)) {\n                    throw new Error(`Data (${data}) must be type of string and one of the following options: ${options}`);\n                }\n            }\n        }\n    }\n}\n\nclass EventEmitter extends events.EventEmitter {\n    constructor() {\n        super();\n    }\n\n    On(event, callback) {\n        this.on(event, callback);\n        return new Resource(() => this.off(event, callback));\n    }\n}\n\nclass Base extends EventEmitter {\n    static Resource = Resource;\n    static Argument = Argument;\n    static ArgumentMap = ArgumentMap;\n\n    resources = [];\n\n    init(args = {}) {\n        Object.getOwnPropertyNames(this).forEach(key => {\n            if (this[key] instanceof Argument || this[key] instanceof ArgumentMap) {\n                this[key].field = key;\n                this[key] = this[key].eval(args[key], key);\n            }\n        });\n    }\n\n    destructor() {\n        this.resources.forEach(resource => {\n            try {\n                if (Array.isArray(resource)) {\n                    resource.forEach(r => r.destructor());\n                } else {\n                    resource.destructor();\n                }\n            } catch (e) { }\n        });\n    }\n}\n\n$.register(\"Base\", Base);\n$.register(\"EventEmitter\", EventEmitter);\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [
-            {
-                "var": "events",
-                "module": "events"
-            }
-        ],
-        "x": 230,
-        "y": 40,
-        "wires": [
-            [
-                "7829eb2fa756222a"
-            ]
         ]
     },
     {
@@ -565,7 +493,7 @@
     {
         "id": "39f787a95ab13d80",
         "type": "subflow:879948f81429fbc8",
-        "z": "115fa01b867da3b7",
+        "z": "91775881b3da3910",
         "name": "",
         "x": 35,
         "y": 40,
@@ -577,7 +505,7 @@
     {
         "id": "6d9d7542c01cafca",
         "type": "subflow:6921f1f3fbfe8775",
-        "z": "115fa01b867da3b7",
+        "z": "91775881b3da3910",
         "name": "",
         "x": 95,
         "y": 40,
@@ -587,7 +515,7 @@
     {
         "id": "640c48c1831986af",
         "type": "subflow:ffb5227f5ff229e9",
-        "z": "115fa01b867da3b7",
+        "z": "91775881b3da3910",
         "name": "",
         "x": 155,
         "y": 40,
@@ -597,7 +525,7 @@
     {
         "id": "1570dd7a319684f0",
         "type": "subflow:2f546c91f509d875",
-        "z": "115fa01b867da3b7",
+        "z": "91775881b3da3910",
         "name": "",
         "x": 35,
         "y": 80,
@@ -609,7 +537,7 @@
     {
         "id": "131b3f30ab2ce0e6",
         "type": "subflow:387c4c2422591430",
-        "z": "115fa01b867da3b7",
+        "z": "91775881b3da3910",
         "name": "",
         "x": 155,
         "y": 80,
@@ -621,7 +549,7 @@
     {
         "id": "ad7297b549e04189",
         "type": "subflow:50dd3bd392e226e0",
-        "z": "115fa01b867da3b7",
+        "z": "91775881b3da3910",
         "name": "",
         "x": 95,
         "y": 80,
