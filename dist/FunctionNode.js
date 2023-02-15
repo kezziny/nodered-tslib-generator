@@ -36,7 +36,7 @@ class FunctionNode {
             code.push(`const ${dependency.var} = await $.get("${dependency.module}");`);
         }
         for (const localImport of this.localImports) {
-            code.push(`const ${localImport.var} = { ${localImport.type}: await $.get("${localImport.module}.${localImport.type}") };`);
+            code.push(`const ${localImport.var} = { ${localImport.types.map(type => `${type}: await $.get("${localImport.module}.${type}")`).join(", ")} };`);
         }
         code.push('');
         code.push('// Implementation');
@@ -46,7 +46,7 @@ class FunctionNode {
         code.push('');
         code.push('');
         code.push('// Exports');
-        for (const type in this.exports) {
+        for (const type of this.exports) {
             code.push(`$.register("${this.args.module}.${type}", ${type});`);
         }
         return code.join("\n");
@@ -65,7 +65,8 @@ class FunctionNode {
                 this.localImports.push({
                     var: match.groups.var,
                     module: this.args.module,
-                    type: match.groups.file,
+                    file: match.groups.file,
+                    types: [],
                 });
                 continue;
             }

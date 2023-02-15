@@ -4,12 +4,12 @@ import { Dependency } from "./Dependency";
 import { UUID } from "./uuid";
 
 export class FunctionNode {
-    private args: FunctionNode.Arguments;
+    public args: FunctionNode.Arguments;
     private lines: string[];
 
     public exports: string[] = [];
+    public localImports: FunctionNode.LocalImport[] = [];
 
-    private localImports: FunctionNode.LocalImport[] = [];
     private libraries: FunctionNode.Dependency[] = [];
     private dependencies: FunctionNode.Dependency[] = [];
 
@@ -49,7 +49,7 @@ export class FunctionNode {
         }
 
         for (const localImport of this.localImports) {
-            code.push(`const ${localImport.var} = { ${localImport.type}: await $.get("${localImport.module}.${localImport.type}") };`);
+            code.push(`const ${localImport.var} = { ${localImport.types.map(type => `${type}: await $.get("${localImport.module}.${type}")`).join(", ")} };`);
         }
 
         // content
@@ -63,7 +63,7 @@ export class FunctionNode {
         code.push('');
         code.push('');
         code.push('// Exports');
-        for (const type in this.exports) {
+        for (const type of this.exports) {
             code.push(`$.register("${this.args.module}.${type}", ${type});`);
         }
 
@@ -89,7 +89,8 @@ export class FunctionNode {
                 this.localImports.push({
                     var: match.groups.var,
                     module: this.args.module,
-                    type: match.groups.file,
+                    file: match.groups.file,
+                    types: [],
                 });
                 continue;
             }
@@ -146,7 +147,8 @@ export namespace FunctionNode {
     export interface LocalImport {
         var: string;
         module: string;
-        type: string;
+        file: string;
+        types: string[];
     }
 
     export interface Dependency {

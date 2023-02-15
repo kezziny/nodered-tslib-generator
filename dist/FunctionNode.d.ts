@@ -1,8 +1,8 @@
 export declare class FunctionNode {
-    private args;
+    args: FunctionNode.Arguments;
     private lines;
     exports: string[];
-    private localImports;
+    localImports: FunctionNode.LocalImport[];
     private libraries;
     private dependencies;
     constructor(args: FunctionNode.Arguments);
@@ -21,7 +21,8 @@ export declare namespace FunctionNode {
     interface LocalImport {
         var: string;
         module: string;
-        type: string;
+        file: string;
+        types: string[];
     }
     interface Dependency {
         var: string;

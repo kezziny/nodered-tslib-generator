@@ -18,6 +18,17 @@ export class Subflow {
             }));
         }
 
+        for (const node of functionNodes) {
+            for (const module of node.localImports) {
+                let referencedNode = functionNodes.find(n => n.args.name === module.file);
+                if (!referencedNode) {
+                    throw new Error("Invalid reference: " + module);
+                }
+
+                module.types = referencedNode.exports;
+            }
+        }
+
         let subflow = Subflow.Descriptor.of({name: this.args.name, id: this.args.uuid});
         subflow.in.push({x: 40, y: 40, wires: []});
         let nodeRed: any[] = [
